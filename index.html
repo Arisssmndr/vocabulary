@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Network System Vocabulary</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            darkBg: '#121212',
+            cardBg: '#1a1a1a',
+            borderDark: '#333333',
+            accentOrange: '#ff9900'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #121212; }
+    ::-webkit-scrollbar-thumb { background: #333333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-darkBg text-white min-h-screen flex flex-col">
+
+  <nav class="flex justify-between items-center px-6 py-5 max-w-7xl mx-auto w-full border-b border-borderDark">
+    <div class="flex items-center gap-2">
+      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+      </svg>
+      <span class="text-xl font-bold tracking-tight">Kamus<span class="text-gray-400 font-normal">Ku</span></span>
+    </div>
+    <div class="hidden md:flex gap-6 text-sm font-medium text-gray-300">
+      <a href="#" class="hover:text-white transition-colors">Vocabulary</a>
+      <a href="#" class="hover:text-white transition-colors">Categories</a>
+      <a href="#" class="hover:text-white transition-colors">About</a>
+    </div>
+    <div>
+      <button class="bg-borderDark hover:bg-gray-700 text-white text-sm font-medium py-2 px-5 rounded-md transition-all border border-gray-600 hover:border-gray-400">
+        Contribute Words
+      </button>
+    </div>
+  </nav>
+
+  <div class="h-3 w-full bg-gradient-to-r from-blue-500 via-accentOrange to-green-500"></div>
+
+  <header class="text-center py-24 px-4 flex-col items-center justify-center relative overflow-hidden">
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-900/10 blur-[100px] rounded-full pointer-events-none"></div>
+    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight relative z-10">
+      Network System <br class="hidden md:block">
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-500">Vocabulary</span>
+    </h1>
+    <p class="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 relative z-10">
+      Learn essential network system terms, devices, technologies, and communication concepts quickly and clearly.
+    </p>
+    <div class="max-w-xl mx-auto relative z-10">
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <input type="text" id="searchInput" class="block w-full p-4 pl-12 text-sm text-white bg-cardBg border border-borderDark rounded-full focus:ring-accentOrange focus:border-accentOrange placeholder-gray-500 transition-all outline-none" placeholder="Search English words or translations...">
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl mx-auto px-4 pb-24 w-full">
+    <div class="flex justify-between items-end mb-8 border-b border-borderDark pb-4">
+      <h2 class="text-2xl font-semibold">Word List</h2>
+      <span id="wordCount" class="text-gray-500 text-sm">Loading...</span>
+    </div>
+
+    <div id="wordGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-8 gap-4"></div>
+
+    <div id="noResults" class="hidden flex-col items-center justify-center py-20 text-center">
+      <svg class="w-16 h-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <h3 class="text-xl font-medium text-gray-300">No words found</h3>
+      <p class="text-gray-500 mt-2">Try another keyword.</p>
+    </div>
+
+    <div class="mt-8 text-center">
+      <button id="loadMoreBtn" class="hidden bg-borderDark hover:bg-gray-700 text-white text-sm font-medium py-2 px-5 rounded-md transition-all border border-gray-600 hover:border-gray-400">
+        Load More
+      </button>
+    </div>
+  </main>
+
+  <footer class="border-t border-borderDark py-8 text-center text-gray-500 text-sm mt-auto">
+    <p>© 2026 KamusKu. Inspired by modern partner-directory design.</p>
+  </footer>
+
+  <script>
+    const vocabularyData = [
+      { en: "network", id: "jaringan" },
+      { en: "system", id: "sistem" },
+      { en: "computer", id: "komputer" },
+      { en: "device", id: "perangkat" },
+      { en: "data", id: "data" },
+      { en: "information", id: "informasi" },
+      { en: "communication", id: "komunikasi" },
+      { en: "connect", id: "menghubungkan" },
+      { en: "connected", id: "terhubung" },
+      { en: "connection", id: "koneksi" },
+      { en: "share", id: "berbagi" },
+      { en: "resource", id: "sumber daya" },
+      { en: "send", id: "mengirim" },
+      { en: "receive", id: "menerima" },
+      { en: "destination", id: "tujuan" },
+      { en: "coverage", id: "cakupan" },
+      { en: "radius", id: "radius" },
+      { en: "range", id: "jangkauan" },
+      { en: "speed", id: "kecepatan" },
+      { en: "latency", id: "latensi" },
+      { en: "interference", id: "gangguan" },
+      { en: "transfer", id: "mentransfer" },
+      { en: "bandwidth", id: "lebar pita" },
+      { en: "throughput", id: "throughput" },
+      { en: "traffic", id: "lalu lintas" },
+      { en: "signal", id: "sinyal" },
+      { en: "wireless", id: "nirkabel" },
+      { en: "wired", id: "berkabel" },
+      { en: "protocol", id: "protokol" },
+      { en: "standard", id: "standar" },
+      { en: "security", id: "keamanan" },
+      { en: "firewall", id: "firewall" },
+      { en: "router", id: "router" },
+      { en: "switch", id: "switch" },
+      { en: "modem", id: "modem" },
+      { en: "access point", id: "titik akses" },
+      { en: "server", id: "server" },
+      { en: "client", id: "klien" },
+      { en: "host", id: "host" },
+      { en: "node", id: "node" },
+      { en: "endpoint", id: "titik akhir" },
+      { en: "terminal", id: "terminal" },
+      { en: "network interface card", id: "kartu antarmuka jaringan" },
+      { en: "nic", id: "nic" },
+      { en: "ethernet", id: "ethernet" },
+      { en: "cable", id: "kabel" },
+      { en: "utp cable", id: "kabel utp" },
+      { en: "fiber optic", id: "serat optik" },
+      { en: "bluetooth", id: "bluetooth" },
+      { en: "zigbee", id: "zigbee" },
+      { en: "wifi", id: "wifi" },
+      { en: "ssid", id: "ssid" },
+      { en: "isp", id: "penyedia layanan internet" },
+      { en: "tethering", id: "tethering" },
+      { en: "mobile phone", id: "telepon seluler" },
+      { en: "laptop", id: "laptop" },
+      { en: "computer room", id: "ruang komputer" },
+      { en: "office", id: "kantor" },
+      { en: "campus", id: "kampus" },
+      { en: "school", id: "sekolah" },
+      { en: "university", id: "universitas" },
+      { en: "building", id: "gedung" },
+      { en: "headquarters", id: "kantor pusat" },
+      { en: "subsidiary", id: "anak perusahaan" },
+      { en: "government", id: "pemerintah" },
+      { en: "urban area", id: "wilayah perkotaan" },
+      { en: "country", id: "negara" },
+      { en: "continent", id: "benua" },
+      { en: "work area", id: "area kerja" },
+      { en: "long distance", id: "jarak jauh" },
+      { en: "large area", id: "area luas" },
+      { en: "personal area network", id: "jaringan area pribadi" },
+      { en: "pan", id: "pan" },
+      { en: "local area network", id: "jaringan area lokal" },
+      { en: "lan", id: "lan" },
+      { en: "metropolitan area network", id: "jaringan area metropolitan" },
+      { en: "man", id: "man" },
+      { en: "wide area network", id: "jaringan area luas" },
+      { en: "wan", id: "wan" },
+      { en: "wireless local area network", id: "jaringan area lokal nirkabel" },
+      { en: "wlan", id: "wlan" },
+      { en: "gaming", id: "game" },
+      { en: "stable transfer", id: "transfer stabil" },
+      { en: "fast connection", id: "koneksi cepat" },
+      { en: "high transfer rate", id: "laju transfer tinggi" },
+      { en: "low latency", id: "latensi rendah" },
+      { en: "weak signal", id: "sinyal lemah" },
+      { en: "strong signal", id: "sinyal kuat" },
+      { en: "digital signal", id: "sinyal digital" },
+      { en: "analog signal", id: "sinyal analog" },
+      { en: "data packet", id: "paket data" },
+      { en: "packet loss", id: "kehilangan paket" },
+      { en: "upload", id: "unggah" },
+      { en: "download", id: "unduh" },
+      { en: "browse", id: "menjelajah" },
+      { en: "log in", id: "masuk" },
+      { en: "log out", id: "keluar" },
+      { en: "authentication", id: "autentikasi" },
+      { en: "authorization", id: "otorisasi" },
+      { en: "encryption", id: "enkripsi" },
+      { en: "decryption", id: "dekripsi" },
+      { en: "backup", id: "cadangan" },
+      { en: "storage", id: "penyimpanan" },
+      { en: "cloud", id: "awan" },
+      { en: "internet", id: "internet" },
+      { en: "intranet", id: "intranet" },
+      { en: "extranet", id: "ekstranet" },
+      { en: "remote", id: "jarak jauh" },
+      { en: "access", id: "akses" },
+      { en: "administrator", id: "administrator" },
+      { en: "configuration", id: "konfigurasi" },
+      { en: "installation", id: "instalasi" },
+      { en: "maintenance", id: "pemeliharaan" },
+      { en: "upgrade", id: "meningkatkan" },
+      { en: "monitor", id: "memantau" },
+      { en: "diagnostic", id: "diagnostik" },
+      { en: "performance", id: "kinerja" },
+      { en: "stable", id: "stabil" },
+      { en: "secure", id: "aman" },
+      { en: "reliable", id: "andal" },
+      { en: "efficient", id: "efisien" },
+      { en: "mobile device", id: "perangkat seluler" },
+      { en: "smart home", id: "rumah pintar" },
+      { en: "smart sensor", id: "sensor pintar" },
+      { en: "printer", id: "printer" },
+      { en: "keyboard", id: "papan ketik" },
+      { en: "mouse", id: "tetikus" },
+      { en: "speaker", id: "speaker" },
+      { en: "headphone", id: "headphone" },
+      { en: "bluetooth earphones", id: "earphone bluetooth" },
+      { en: "smartphone", id: "ponsel pintar" },
+      { en: "tablet", id: "tablet" },
+      { en: "lore", id: "istilah" }
+    ];
+
+    vocabularyData.sort((a, b) => a.en.localeCompare(b.en));
+
+    const wordGrid = document.getElementById('wordGrid');
+    const searchInput = document.getElementById('searchInput');
+    const noResults = document.getElementById('noResults');
+    const wordCount = document.getElementById('wordCount');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    const pageSize = 48;
+    let filteredData = [...vocabularyData];
+    let visibleCount = pageSize;
+    let voices = [];
+
+    function loadVoices() {
+      voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    }
+
+    if ('speechSynthesis' in window) {
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    function speakWord(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.95;
+      utterance.pitch = 1;
+      const preferred = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+      if (preferred) utterance.voice = preferred;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function createCard(item) {
+      const card = document.createElement('div');
+      card.className = 'bg-cardBg border border-borderDark rounded-xl p-5 hover:border-gray-500 hover:bg-[#222] transition-all duration-300 group cursor-pointer flex flex-col justify-between h-full';
+      card.innerHTML = `
+        <div>
+          <div class="flex justify-between items-start mb-2 gap-3">
+            <h3 class="text-xl font-bold text-white group-hover:text-accentOrange transition-colors break-words">${item.en}</h3>
+            <button type="button" class="shrink-0 p-1 rounded-md text-gray-600 hover:text-gray-300 transition-colors" aria-label="Speak ${item.en}" title="Speak">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="text-gray-400 font-medium">${item.id}</p>
+        </div>`;
+      card.querySelector('button').addEventListener('click', (e) => {
+        e.stopPropagation();
+        speakWord(item.en);
+      });
+      card.addEventListener('click', () => speakWord(item.en));
+      return card;
+    }
+
+    function renderCards() {
+      wordGrid.innerHTML = '';
+      const data = filteredData.slice(0, visibleCount);
+
+      if (filteredData.length === 0) {
+        wordGrid.classList.add('hidden');
+        noResults.classList.remove('hidden');
+        noResults.classList.add('flex');
+      } else {
+        wordGrid.classList.remove('hidden');
+        noResults.classList.add('hidden');
+        noResults.classList.remove('flex');
+        const frag = document.createDocumentFragment();
+        data.forEach(item => frag.appendChild(createCard(item)));
+        wordGrid.appendChild(frag);
+      }
+
+      wordCount.textContent = `Showing ${Math.min(visibleCount, filteredData.length)} of ${filteredData.length} words`;
+      loadMoreBtn.classList.toggle('hidden', visibleCount >= filteredData.length || filteredData.length === 0);
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase().trim();
+      filteredData = vocabularyData.filter(item =>
+        item.en.toLowerCase().includes(searchTerm) ||
+        item.id.toLowerCase().includes(searchTerm)
+      );
+      visibleCount = pageSize;
+      renderCards();
+    });
+
+    loadMoreBtn.addEventListener('click', () => {
+      visibleCount += pageSize;
+      renderCards();
+    });
+
+    renderCards();
+  </script>
+</body>
+</html>
