@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Network System Vocabulary</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -13,7 +15,8 @@
             darkBg: '#121212',
             cardBg: '#1a1a1a',
             borderDark: '#333333',
-            accentOrange: '#ff9900'
+            accentOrange: '#ff9900',
+            quizGreen: '#359469'
           },
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -22,39 +25,79 @@
       }
     }
   </script>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     ::-webkit-scrollbar { width: 8px; }
     ::-webkit-scrollbar-track { background: #121212; }
     ::-webkit-scrollbar-thumb { background: #333333; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #555; }
     body { font-family: 'Inter', sans-serif; }
+
+    .quiz-hidden { display: none !important; }
+
+    .quiz-option {
+      transition: transform .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .quiz-option:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .quiz-option.correct {
+      background: rgba(34, 197, 94, .15);
+      border-color: rgba(34, 197, 94, .8);
+    }
+    .quiz-option.wrong {
+      background: rgba(239, 68, 68, .14);
+      border-color: rgba(239, 68, 68, .8);
+    }
+    .quiz-pop {
+      animation: quizPop .28s ease;
+    }
+    @keyframes quizPop {
+      0% { transform: scale(.96); opacity: .5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .star-glow {
+      text-shadow: 0 0 18px rgba(255, 153, 0, .35);
+    }
+    
   </style>
 </head>
 <body class="bg-darkBg text-white min-h-screen flex flex-col">
 
-  <nav class="flex justify-between items-center px-6 py-5 max-w-7xl mx-auto w-full border-b border-borderDark">
-    <div class="flex items-center gap-2">
-      <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-      </svg>
-      <span class="text-xl font-bold tracking-tight">Kamus<span class="text-gray-400 font-normal">Ku</span></span>
-    </div>
-    <div class="hidden md:flex gap-6 text-sm font-medium text-gray-300">
-      <a href="#" class="hover:text-white transition-colors">Vocabulary</a>
-      <a href="#" class="hover:text-white transition-colors">Categories</a>
-      <a href="#" class="hover:text-white transition-colors">About</a>
-    </div>
-    <div>
-      <button class="bg-borderDark hover:bg-gray-700 text-white text-sm font-medium py-2 px-5 rounded-md transition-all border border-gray-600 hover:border-gray-400">
-        Contribute Words
-      </button>
-    </div>
-  </nav>
+  <div class="fixed w-full bg-darkBg z-40">
+    <nav class="flex justify-between items-center px-6 py-5 max-w-7xl mx-auto w-full border-b border-borderDark">
+      <div id="homeBtn" class="flex items-center gap-2 cursor-pointer select-none">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        <span class="text-xl font-bold tracking-tight">Kamus<span class="text-gray-400 font-normal">Ku</span></span>
+      </div>
 
-  <div class="h-3 w-full bg-gradient-to-r from-blue-500 via-accentOrange to-green-500"></div>
+      <div class="hidden md:flex gap-6 text-sm font-medium text-gray-300">
+        <a id="vocabularyNav" href="javascript:void(0)" class="hover:text-white transition-colors">Vocabulary</a>
+        <a href="#" class="hover:text-white transition-colors">Categories</a>
+        <a href="#" class="hover:text-white transition-colors">About</a>
+      </div>
 
-  <header class="text-center py-24 px-4 flex-col items-center justify-center relative overflow-hidden">
+      <div class="flex items-center gap-2">
+        <button id="quizBtn" class="bg-quizGreen text-white text-sm font-medium py-2 px-5 rounded-md transition-all border border-gray-600 hover:brightness-110">
+          Quiz
+        </button>
+        <div class="inline-block rounded-md bg-gradient-to-r from-blue-500 via-accentOrange to-green-500 p-[1.5px]">
+          <button id="historyBtn" class="rounded-md bg-darkBg px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-all">
+            History
+          </button>
+        </div>
+      </div>
+    </nav>
+    <div class="h-2.5 w-full bg-gradient-to-r from-blue-500 via-accentOrange to-green-500"></div>
+  </div>
+
+  <header id="pageHeader" class="text-center pt-40 pb-24 px-4 flex-col items-center justify-center overflow-hidden relative">
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-900/10 blur-[100px] rounded-full pointer-events-none"></div>
     <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight relative z-10">
       Network System <br class="hidden md:block">
@@ -73,9 +116,9 @@
     </div>
   </header>
 
-  <main class="flex-grow max-w-7xl mx-auto px-4 pb-24 w-full">
+  <main id="mainContent" class="flex-grow max-w-7xl mx-auto px-4 pb-24 w-full">
     <div class="flex justify-between items-end mb-8 border-b border-borderDark pb-4">
-      <h2 class="text-2xl font-semibold">Word List</h2>
+      <h2 id="sectionTitle" class="text-2xl font-semibold">Word List</h2>
       <span id="wordCount" class="text-gray-500 text-sm">Loading...</span>
     </div>
 
@@ -87,6 +130,7 @@
       <p class="text-gray-500 mt-2">Try another keyword.</p>
     </div>
 
+    <!-- button -->
     <div class="mt-8 text-center">
       <button id="loadMoreBtn" class="hidden bg-borderDark hover:bg-gray-700 text-white text-sm font-medium py-2 px-5 rounded-md transition-all border border-gray-600 hover:border-gray-400">
         Load More
@@ -94,8 +138,77 @@
     </div>
   </main>
 
+  <section id="quizPanel" class="hidden max-w-7xl mx-auto px-4 pb-24 w-full pt-12">
+    <div class="flex justify-between items-end mb-8 border-b border-borderDark pb-4">
+      <h2 class="text-2xl font-semibold">Quiz Mode</h2>
+      <span id="quizMeta" class="text-gray-500 text-sm">10 questions per round</span>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+      <div id="quizCard" class="bg-cardBg border border-borderDark rounded-2xl p-6 md:p-8 shadow-2xl quiz-pop">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <p id="quizProgress" class="text-sm text-gray-400">Question 1 of 10</p>
+            <h3 id="quizQuestion" class="text-2xl md:text-3xl font-bold mt-2">---</h3>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="text-right">
+              <p class="text-xs text-gray-500">Score</p>
+              <p id="quizScore" class="text-2xl font-bold text-white">0</p>
+            </div>
+            <div class="w-px h-10 bg-borderDark"></div>
+            <div class="text-right">
+              <p class="text-xs text-gray-500">Time</p>
+              <p id="quizTimer" class="text-2xl font-bold text-white">0</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-borderDark text-xs text-gray-400 mb-3">
+            <span class="w-2 h-2 rounded-full bg-accentOrange"></span>
+            Choose the correct English word
+          </div>
+          <p id="quizPrompt" class="text-gray-300 text-lg md:text-xl leading-relaxed">---</p>
+        </div>
+
+        <div id="answerGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+        <div id="quizActions" class="flex flex-wrap gap-3 mt-8">
+          <button id="nextBtn" class="hidden bg-accentOrange hover:brightness-110 text-black font-semibold py-3 px-6 rounded-lg transition-all">
+            Next Question
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="historyPanel" class="hidden max-w-7xl mx-auto px-4 pb-24 w-full pt-12">
+    <div class="flex justify-between items-end mb-8 border-b border-borderDark pb-4">
+      <h2 class="text-2xl font-semibold">Quiz History</h2>
+      <span id="historyCount" class="text-gray-500 text-sm">Saved locally</span>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+      <div id="historyEmpty" class="hidden bg-cardBg border border-borderDark rounded-2xl p-8 text-center text-gray-400">
+        No quiz history yet.
+      </div>
+
+      <div id="historyList" class="space-y-4"></div>
+
+      <div class="mt-6 flex gap-3">
+        <button id="closeHistoryBtn" class="bg-borderDark hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-all border border-gray-600 hover:border-gray-400">
+          Close History
+        </button>
+        <button id="clearHistoryBtn" class="bg-borderDark hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-all border border-gray-600 hover:border-gray-400">
+          Clear History
+        </button>
+      </div>
+    </div>
+  </section>
+
   <footer class="border-t border-borderDark py-8 text-center text-gray-500 text-sm mt-auto">
-    <p>© 2026 KamusKu. Inspired by modern partner-directory design.</p>
+    <p>© 2026 KamusKu. by Aris Munandar Aldyana Padlan Taopikurohman.</p>
   </footer>
 
   <script>
@@ -231,8 +344,7 @@
       { en: "headphone", id: "headphone" },
       { en: "bluetooth earphones", id: "earphone bluetooth" },
       { en: "smartphone", id: "ponsel pintar" },
-      { en: "tablet", id: "tablet" },
-      { en: "lore", id: "istilah" }
+      { en: "tablet", id: "tablet" }
     ];
 
     vocabularyData.sort((a, b) => a.en.localeCompare(b.en));
@@ -242,11 +354,45 @@
     const noResults = document.getElementById('noResults');
     const wordCount = document.getElementById('wordCount');
     const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const quizBtn = document.getElementById('quizBtn');
+    const historyBtn = document.getElementById('historyBtn');
+    const mainContent = document.getElementById('mainContent');
+    const quizPanel = document.getElementById('quizPanel');
+    const historyPanel = document.getElementById('historyPanel');
+    const pageHeader = document.getElementById('pageHeader');
+    const homeBtn = document.getElementById('homeBtn');
+    const vocabularyNav = document.getElementById('vocabularyNav');
+
+    const quizProgress = document.getElementById('quizProgress');
+    const quizQuestion = document.getElementById('quizQuestion');
+    const quizPrompt = document.getElementById('quizPrompt');
+    const quizScore = document.getElementById('quizScore');
+    const quizTimer = document.getElementById('quizTimer');
+    const answerGrid = document.getElementById('answerGrid');
+    const nextBtn = document.getElementById('nextBtn');
+    const quizMeta = document.getElementById('quizMeta');
+    const quizCard = document.getElementById('quizCard');
+
+    const historyList = document.getElementById('historyList');
+    const historyEmpty = document.getElementById('historyEmpty');
+    const historyCount = document.getElementById('historyCount');
+    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
     const pageSize = 48;
     let filteredData = [...vocabularyData];
     let visibleCount = pageSize;
     let voices = [];
+    let quizQuestions = [];
+    let currentQuizIndex = 0;
+    let currentScore = 0;
+    let answered = false;
+    let quizTimerValue = 0;
+    let quizTimerHandle = null;
+    let audioCtx = null;
+    let historyCache = [];
+
+    const HISTORY_KEY = 'networkQuizHistory_v1';
 
     function loadVoices() {
       voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
@@ -269,28 +415,38 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    function createCard(item) {
-      const card = document.createElement('div');
-      card.className = 'bg-cardBg border border-borderDark rounded-xl p-5 hover:border-gray-500 hover:bg-[#222] transition-all duration-300 group cursor-pointer flex flex-col justify-between h-full';
-      card.innerHTML = `
-        <div>
-          <div class="flex justify-between items-start mb-2 gap-3">
-            <h3 class="text-xl font-bold text-white group-hover:text-accentOrange transition-colors break-words">${item.en}</h3>
-            <button type="button" class="shrink-0 p-1 rounded-md text-gray-600 hover:text-gray-300 transition-colors" aria-label="Speak ${item.en}" title="Speak">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
-              </svg>
-            </button>
-          </div>
-          <p class="text-gray-400 font-medium">${item.id}</p>
-        </div>`;
-      card.querySelector('button').addEventListener('click', (e) => {
-        e.stopPropagation();
-        speakWord(item.en);
-      });
-      card.addEventListener('click', () => speakWord(item.en));
-      return card;
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
     }
+
+    function createCard(item) {
+  const card = document.createElement('div');
+  card.className = 'bg-cardBg border border-borderDark rounded-xl p-5 transition-all duration-300 group cursor-pointer flex flex-col justify-between h-full';
+  card.innerHTML = `
+    <div>
+      <div class="flex justify-between items-start mb-2 gap-3">
+        <h3 class="text-xl font-bold text-white group-hover:text-accentOrange transition-colors break-words">${item.en}</h3>
+        <button type="button" class="shrink-0 p-1 rounded-md text-gray-600 hover:text-gray-300 transition-colors" aria-label="Speak ${item.en}" title="Speak">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="text-gray-400 font-medium">${item.id}</p>
+    </div>`;
+  
+  card.querySelector('button').addEventListener('click', (e) => {
+    e.stopPropagation();
+    speakWord(item.en);
+  });
+  card.addEventListener('click', () => speakWord(item.en));
+  return card;
+}
 
     function renderCards() {
       wordGrid.innerHTML = '';
@@ -328,7 +484,346 @@
       renderCards();
     });
 
+    function playTone(ok = true) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = ok ? 'triangle' : 'square';
+        osc.frequency.setValueAtTime(ok ? 880 : 160, audioCtx.currentTime);
+        if (ok) osc.frequency.exponentialRampToValueAtTime(1240, audioCtx.currentTime + 0.12);
+        else osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.16);
+        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(ok ? 0.12 : 0.16, audioCtx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.18);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+      } catch (e) {}
+    }
+
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function saveHistory(entry) {
+      const history = getHistory();
+      history.unshift(entry);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 50)));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = getHistory();
+      historyCount.textContent = `${history.length} record(s) saved`;
+      historyList.innerHTML = '';
+      historyEmpty.classList.toggle('hidden', history.length !== 0);
+
+      history.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'bg-cardBg border border-borderDark rounded-2xl p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-3';
+        el.innerHTML = `
+          <div>
+            <p class="text-white font-semibold">${item.date}</p>
+            <p class="text-gray-400 text-sm mt-1">Score: ${item.score}/10 • Correct: ${item.correct}/10 • Stars: ${item.stars}</p>
+          </div>
+          <div class="text-accentOrange font-bold text-2xl md:text-3xl star-glow">${item.stars}</div>
+        `;
+        historyList.appendChild(el);
+      });
+    }
+
+    function starsForScore(score) {
+      if (score >= 10) return '★★★';
+      if (score >= 7) return '★★☆';
+      if (score >= 4) return '★☆☆';
+      return '☆☆☆';
+    }
+
+    function startTimer() {
+      clearInterval(quizTimerHandle);
+      quizTimerHandle = setInterval(() => {
+        quizTimerValue++;
+        quizTimer.textContent = String(quizTimerValue);
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(quizTimerHandle);
+      quizTimerHandle = null;
+    }
+
+    function showResultPopup(isCorrect, correctAnswer) {
+      const html = isCorrect
+        ? `
+          <div style="text-align:center">
+            <div style="font-size:72px;line-height:1">✔</div>
+            <div style="font-size:22px;font-weight:800;margin-top:10px">Correct!</div>
+            <div style="margin-top:10px;color:#d1d5db">Nice answer. Keep going.</div>
+          </div>`
+        : `
+          <div style="text-align:center">
+            <div style="font-size:72px;line-height:1;color:#ef4444">✘</div>
+            <div style="font-size:22px;font-weight:800;margin-top:10px;color:#fca5a5">Wrong answer</div>
+            <div style="margin-top:10px;color:#86efac">Correct answer: <b>${correctAnswer}</b></div>
+          </div>`;
+
+      Swal.fire({
+        background: '#1a1a1a',
+        color: '#fff',
+        html,
+        showConfirmButton: false,
+        timer: 900,
+        timerProgressBar: true,
+        width: 420,
+        padding: '1.5rem',
+        backdrop: 'rgba(0,0,0,.65)'
+      });
+    }
+
+    function buildQuiz() {
+      const base = shuffle(vocabularyData);
+      const selected = base.slice(0, 10);
+      quizQuestions = selected.map(q => {
+        const wrongPool = vocabularyData.filter(v => v.en !== q.en);
+        const wrongs = shuffle(wrongPool).slice(0, 3).map(x => x.en);
+        const options = shuffle([q.en, ...wrongs]);
+        return { ...q, options };
+      });
+
+      currentQuizIndex = 0;
+      currentScore = 0;
+      answered = false;
+      quizTimerValue = 0;
+      quizScore.textContent = '0';
+      quizTimer.textContent = '0';
+      nextBtn.classList.add('hidden');
+      hideFinalButtons();
+      renderQuizQuestion();
+      startTimer();
+    }
+
+    function renderQuizQuestion() {
+      answered = false;
+      const q = quizQuestions[currentQuizIndex];
+      quizProgress.textContent = `Question ${currentQuizIndex + 1} of 10`;
+      quizQuestion.textContent = q.id;
+      quizPrompt.textContent = 'Choose the correct English word for this Indonesian meaning.';
+      answerGrid.innerHTML = '';
+
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option text-left bg-[#181818] border border-borderDark rounded-xl px-5 py-4 hover:border-gray-500';
+        btn.innerHTML = `<span class="block text-lg font-semibold">${opt}</span>`;
+        btn.addEventListener('click', () => selectAnswer(btn, opt, q.en));
+        answerGrid.appendChild(btn);
+      });
+
+      quizCard.classList.remove('quiz-pop');
+      void quizCard.offsetWidth;
+      quizCard.classList.add('quiz-pop');
+    }
+
+    function finishQuiz() {
+      stopTimer();
+      const stars = starsForScore(currentScore);
+      const total = 10;
+
+      Swal.fire({
+        background: '#121212',
+        color: '#fff',
+        html: `
+          <div style="text-align:center">
+            <div style="font-size:76px;line-height:1" class="star-glow">${stars}</div>
+            <div style="margin-top:14px;font-size:30px;font-weight:900">Quiz Completed</div>
+            <div style="margin-top:12px;font-size:18px;color:#d1d5db">Your final score is</div>
+            <div style="margin-top:10px;font-size:54px;font-weight:900;color:#ff9900">${currentScore}<span style="font-size:22px;color:#9ca3af"> / ${total}</span></div>
+            <div style="margin-top:12px;color:#9ca3af">Great work. Keep leveling up your vocabulary.</div>
+          </div>
+        `,
+        confirmButtonText: 'View History',
+        showCancelButton: true,
+        cancelButtonText: 'Close',
+        confirmButtonColor: '#ff9900',
+        cancelButtonColor: '#374151',
+        width: 540,
+        padding: '2rem',
+        backdrop: 'rgba(0,0,0,.72)'
+      }).then((result) => {
+        if (result.isConfirmed) openHistory();
+        else closeQuiz();
+      });
+
+      saveHistory({
+        date: new Date().toLocaleString(),
+        score: currentScore,
+        correct: currentScore,
+        stars
+      });
+    }
+
+    function showFinalButtons() {
+      nextBtn.classList.add('hidden');
+      const quizActions = document.getElementById('quizActions');
+      let finalBox = document.getElementById('finalActions');
+      if (!finalBox) {
+        finalBox = document.createElement('div');
+        finalBox.id = 'finalActions';
+        finalBox.className = 'flex flex-wrap gap-3 mt-8';
+        finalBox.innerHTML = `
+          <button id="finalHistoryBtn" class="bg-borderDark hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-all border border-gray-600 hover:border-gray-400">
+            History
+          </button>
+          <button id="finalCloseBtn" class="bg-borderDark hover:bg-gray-700 text-white font-medium py-3 px-6 rounded-lg transition-all border border-gray-600 hover:border-gray-400">
+            Close Quiz
+          </button>
+        `;
+        quizActions.appendChild(finalBox);
+        document.getElementById('finalHistoryBtn').addEventListener('click', openHistory);
+        document.getElementById('finalCloseBtn').addEventListener('click', closeQuiz);
+      }
+      finalBox.classList.remove('hidden');
+    }
+
+    function hideFinalButtons() {
+      const finalBox = document.getElementById('finalActions');
+      if (finalBox) finalBox.classList.add('hidden');
+    }
+
+    function selectAnswer(button, chosen, correct) {
+      if (answered) return;
+      answered = true;
+      const buttons = [...answerGrid.querySelectorAll('button')];
+      buttons.forEach(b => b.disabled = true);
+
+      const isCorrect = chosen === correct;
+      if (isCorrect) {
+        currentScore++;
+        quizScore.textContent = String(currentScore);
+        button.classList.add('correct');
+        playTone(true);
+        showResultPopup(true, correct);
+      } else {
+        button.classList.add('wrong');
+        buttons.forEach(b => {
+          if (b.textContent.trim() === correct) b.classList.add('correct');
+        });
+        playTone(false);
+        showResultPopup(false, correct);
+      }
+
+      setTimeout(() => {
+        if (currentQuizIndex < 9) {
+          currentQuizIndex++;
+          renderQuizQuestion();
+        } else {
+          showFinalButtons();
+          finishQuiz();
+        }
+      }, 1000);
+    }
+
+    function openQuiz() {
+      pageHeader.classList.add('quiz-hidden');
+      mainContent.classList.add('quiz-hidden');
+      historyPanel.classList.add('hidden');
+      quizPanel.classList.remove('hidden');
+      buildQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeQuiz() {
+      stopTimer();
+      quizPanel.classList.add('hidden');
+      pageHeader.classList.remove('quiz-hidden');
+      mainContent.classList.remove('quiz-hidden');
+      historyPanel.classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openHistory() {
+      pageHeader.classList.add('quiz-hidden');
+      mainContent.classList.add('quiz-hidden');
+      quizPanel.classList.add('hidden');
+      historyPanel.classList.remove('hidden');
+      renderHistory();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openHome() {
+      pageHeader.classList.remove('quiz-hidden');
+      mainContent.classList.remove('quiz-hidden');
+      quizPanel.classList.add('hidden');
+      historyPanel.classList.add('hidden');
+      searchInput.value = '';
+      filteredData = [...vocabularyData];
+      visibleCount = pageSize;
+      renderCards();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    quizBtn.addEventListener('click', openQuiz);
+    historyBtn.addEventListener('click', openHistory);
+    homeBtn.addEventListener('click', openHome);
+    vocabularyNav.addEventListener('click', openHome);
+
+    closeHistoryBtn.addEventListener('click', () => {
+      historyPanel.classList.add('hidden');
+      pageHeader.classList.remove('quiz-hidden');
+      mainContent.classList.remove('quiz-hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    clearHistoryBtn.addEventListener('click', () => {
+      localStorage.removeItem(HISTORY_KEY);
+      renderHistory();
+      Swal.fire({
+        icon: 'info',
+        title: 'History cleared',
+        text: 'All saved quiz records have been removed.',
+        background: '#1a1a1a',
+        color: '#fff',
+        confirmButtonColor: '#ff9900'
+      });
+    });
+
+    const aboutItems = ['Aris Munandar', 'Aldyana', 'Padlan Taopikurohman'];
+    const aboutLink = document.querySelector('a[href="#"]:last-of-type');
+    if (aboutLink) {
+      aboutLink.addEventListener('click', () => {
+        Swal.fire({
+          background: '#121212',
+          color: '#fff',
+          title: 'About This Project',
+          html: `
+            <div style="text-align:left;line-height:1.75">
+              <p>This project is created to fulfill the ESP 2 assignment as a vocabulary learning application focused on network system terms. The main goal of this project is to help students learn English vocabulary in a more interactive, practical, and enjoyable way through a simple web-based experience.</p>
+              <p style="margin-top:12px">The application combines a vocabulary list, search feature, interactive quiz mode, and local history storage so the user can review previous quiz results without needing a login system or database. This makes the project lightweight, easy to run, and suitable for classroom presentation or individual learning.</p>
+              <p style="margin-top:12px">This project was prepared by the following students:</p>
+              <ul style="margin-top:8px;padding-left:20px">
+                <li>Aris Munandar</li>
+                <li>Aldyana</li>
+                <li>Padlan Taopikurohman</li>
+              </ul>
+              <p style="margin-top:12px">Through this project, we hope to show that English learning can be made more engaging when combined with interactive web design, game-like feedback, and clear user interaction. The quiz system encourages repeated practice, while the vocabulary list helps users understand the meaning and pronunciation of words related to computer networking and digital communication.</p>
+            </div>
+          `,
+          confirmButtonText: 'Close',
+          confirmButtonColor: '#ff9900',
+          width: 700
+        });
+      });
+    }
+
     renderCards();
+    renderHistory();
   </script>
 </body>
 </html>
